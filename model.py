@@ -1,9 +1,8 @@
 """This module provides the function to build the network."""
 import torch
-from torch.nn import Sequential
 
 
-def build_landmark_model(output_size) -> Sequential:
+def get_landmark_model(output_size) -> torch.nn.Module:
     """Build the convolutional network model with Keras Functional API.
 
     Args:
@@ -12,7 +11,7 @@ def build_landmark_model(output_size) -> Sequential:
     Returns:
         a model
     """
-    return torch.nn.Sequential(
+    model = torch.nn.Sequential(
         # |== Layer 1 ==|
         torch.nn.Conv2d(
             in_channels=3,
@@ -115,3 +114,5 @@ def build_landmark_model(output_size) -> Sequential:
         torch.nn.LazyBatchNorm1d(),
         torch.nn.LazyLinear(out_features=output_size)
     )
+    model.to(torch.device('cuda'))
+    return model
