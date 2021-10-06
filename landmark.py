@@ -68,10 +68,8 @@ def main(train_record: str, train_index: str, batch_size: int, lr: float, output
     train_losses = []
     val_losses = []
     for epoch in range(args.epochs):
-        train_loss = 0.0
-        val_loss = 0.0
-        train_acc = 0.0
-        val_acc = 0.0
+        train_loss = []
+        val_loss = []
 
         model.train()
         for data in iter(train_data_loader):
@@ -81,25 +79,24 @@ def main(train_record: str, train_index: str, batch_size: int, lr: float, output
             loss = criterion.forward(outputs, targets)
             loss.backward()
             optimizer.step()
-            train_loss += loss.item()
-            train_acc += (outputs == targets).sum().item()
+            train_loss.append(loss.item())
 
         with torch.no_grad():
             model.eval()
             for data in iter(val_data_loader):
-                optimizer.zero_grad()
                 outputs = model.forward(data[IMAGE].float().cuda())
                 targets = data[MARKS].float().cuda()
                 loss = criterion.forward(outputs, targets)
-                val_loss += loss.item()
-                val_acc += (outputs == targets).sum().item()
+                val_loss.append(loss.item())
 
-        train_losses.append(train_loss)
-        val_losses.append(val_loss)
+        avg_train_loss = sum(train_loss) / len(train_loss)
+        avg_val_loss = sum(val_loss) / len(val_loss)
+        train_losses.append(avg_train_loss)
+        val_losses.append(avg_val_loss)
         print(
             f"""Epoch {epoch}:
-            Train: loss = {train_loss} acc = {train_acc}
-            Validation: loss = {val_loss} acc = {val_acc}
+            Train: loss = {avg_train_loss}
+            Validation: loss = {avg_val_loss}
             """
         )
 
